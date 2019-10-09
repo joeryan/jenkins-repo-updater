@@ -40,9 +40,9 @@ def check_if_update_required(branch_repos, last_update):
 def check_snapshot_update_time(repo, last_update):
     print("checking {0}/{1}".format(repo['dist'],repo['branch']))
     # temp file of xml webapi output
-    for update_time in ET.parse("./mockxml/{}rss.xml".format(repo['branch'])).getiterator('updated'):
+    for update_time in ET.parse("./mockxml/{}rss.xml".format(repo['branch'])).iter("{}updated".format(options['namespace'])):
         jenkins_updated = dt.strptime(update_time.text, '%Y-%m-%dT%H:%M:%SZ')
-        print("")
+        # print("{} updated on {}".for/mat(repo['branch'],jenkins_updated))
         if  jenkins_updated > last_update:
             print("new update: {}".format(update_time.text))
             return True
@@ -55,11 +55,6 @@ def rsync_call_to_bash(sync_required):
     if sync_required['stable'] or sync_required['unstable']:
         print("rsync to CTS ....")
 
-def set_default_options(base_options):
-    if not base_options['dt_format']: base_options['dt_format'] = "%Y-%m-%d %H:%M:%S.%f"
-    # if not base_options['log_level']: base_options['log_level'] = logging.ERROR
-    if not base_options['file_path']: base_options['file_path'] = '.' 
-
 
 if __name__ == '__main__':
     import argparse
@@ -67,15 +62,11 @@ if __name__ == '__main__':
     parser.add_argument('-c','--config', help="configuration file to use", action='store')
     args = parser.parse_args()
     if args.config:
-        with open(args.config, 'r') as configfile:
-            options = json.load(configfile)
+        config_file = args.config
     else:
-        options = {
-            'dt_format': "%Y-%m-%d %H:%M:%S.%f",
-            'file_path': '.',
-            'log_level': logging.ERROR
-        }
-    set_default_options(options) 
+        config_file = 'config.json'
+    with open(config_file, 'r') as f:
+            options = json.load(f)
     current_datetime = dt.now()
     branches = [ {'name': 'stable',
                     'repos': [{'branch': 'fc1', 'dist': 'jessie'},

@@ -1,0 +1,6 @@
+{
+    "dt_format": "%Y-%m-%d %H:%M:%S.%f",
+    "file_path": ".",
+    "jenkins_base_url": "http://localhost",
+    "namespace": "{http://www.w3.org/2005/Atom}"
+}
