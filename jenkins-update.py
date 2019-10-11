@@ -31,10 +31,11 @@ def check_if_update_required(branch_repos, last_update):
     if last_update.day < dt.today().day:
         print("first snapshot of the day")
         update_required = True
-    for repo in branch['repos']:
-        if check_snapshot_update_time(repo, last_update): 
-            update_required = True
-            break
+    else:
+        for repo in branch['repos']:
+            if check_snapshot_update_time(repo, last_update): 
+                update_required = True
+                break
     return update_required
 
 def check_snapshot_update_time(repo, last_update):
