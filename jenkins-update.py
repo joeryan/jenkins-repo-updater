@@ -4,7 +4,8 @@ from os import path
 from xml.etree import ElementTree as ET
 import json
 import logging
-from collections import defaultdict
+import requests
+import sys
 
 
 # read config or last update
@@ -41,7 +42,11 @@ def check_if_update_required(branch_repos, last_update):
 def check_snapshot_update_time(repo, last_update):
     print("checking {0}/{1}".format(repo['dist'],repo['branch']))
     # temp file of xml webapi output
-    for update_time in ET.parse("./mockxml/{}rss.xml".format(repo['branch'])).iter("{}updated".format(options['namespace'])):
+    #for update_time in ET.parse("./mockxml/{}rss.xml".format(repo['branch'])).iter("{}updated".format(options['namespace'])):
+    rss_feed_url = options['jenkins_base_url'] + "Debian Packages {}/rssLatest".format(repo['branch'])
+    rss_latest = requests.get(rss_feed_url)
+    if not rss_latest.status_code == 200: sys.exit(100)
+    for update_time in ET.fromstring(rss_latest.text).iter("{}updated".format(options['namespace'])):
         jenkins_updated = dt.strptime(update_time.text, '%Y-%m-%dT%H:%M:%SZ')
         # print("{} updated on {}".for/mat(repo['branch'],jenkins_updated))
         if  jenkins_updated > last_update:
@@ -68,15 +73,15 @@ if __name__ == '__main__':
         config_file = 'config.json'
     with open(config_file, 'r') as f:
             options = json.load(f)
-    current_datetime = dt.now()
+    current_datetime = dt.utcnow()
     branches = [ {'name': 'stable',
-                    'repos': [{'branch': 'fc1', 'dist': 'jessie'},
-                            {'branch': 'fc2', 'dist': 'stretch'},
-                            {'branch': 'fc3', 'dist': 'buster'}]},
+                    'repos': [{'branch': 'FC1', 'dist': 'jessie'},
+                            {'branch': 'FC2', 'dist': 'stretch'},
+                            {'branch': 'FC3', 'dist': 'buster'}]},
                 {'name': 'unstable', 
                     'repos': [{'branch': 'unstable', 'dist': 'jessie'},
-                            {'branch': 'uc2', 'dist': 'stretch'},
-                            {'branch': 'uc3', 'dist': 'buster'}]
+                            {'branch': 'UC2', 'dist': 'stretch'},
+                            {'branch': 'UC3', 'dist': 'buster'}]
                 } ]
     sync_required = {'stable': False, 'unstable': False }
     for branch in branches:
