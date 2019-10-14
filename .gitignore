@@ -1,0 +1,11 @@
+.vscode/
+bin/
+env/
+*.date
+lib/
+lib64
+local.json
+mockxml/
+pyvenv.cfg
+share/
+test.xml
